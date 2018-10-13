@@ -15,3 +15,7 @@ set(SYSTEM_FILES
 set(SOURCE_FILES ${SYSTEM_FILES})
 
 add_library(tgSQLiteConnector ${SYSTEM_FILES})
+
+find_package (Threads REQUIRED)
+
+target_link_libraries (tgSQLiteConnector ${CMAKE_THREAD_LIBS_INIT} ${CMAKE_DL_LIBS})
