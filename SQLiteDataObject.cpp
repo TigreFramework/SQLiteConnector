@@ -15,8 +15,12 @@ SQLiteDataObject::SQLiteDataObject(const string &dns, const string &username, co
     this->database = nullptr;
     int error = sqlite3_open(dns.c_str(), &this->database);
     if(error != SQLITE_OK) {
-        // TODO Parse all Errors codes to create a more friendly message
-        throw SQLiteException("Impossible to open a connection to the Database");
+        std::string message = sqlite3_errmsg(this->database);
+        if(this->database != NULL){
+            sqlite3_close(this->database);
+            this->database = nullptr;
+        }
+        throw SQLiteException(message);
     }
 
 }
@@ -58,7 +62,13 @@ void SQLiteDataObject::errorInfo() {}
 /**
  * Executa uma instrução SQL e retornar o número de linhas afetadas
  */
-void SQLiteDataObject::exec() {}
+int SQLiteDataObject::exec(std::string sql) {
+    auto statement = new SQLiteStatement(this->database, sql);
+    this->statement.push_back(statement);
+    statement->execute();
+    statement->fetchAll();
+    return statement->rowCount();
+}
 
 /**
  * Recuperar um atributo da conexão com o banco de dados
