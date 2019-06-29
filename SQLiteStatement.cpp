@@ -9,10 +9,7 @@ SQLiteStatement::SQLiteStatement(sqlite3 *connection, std::string sql) : DataObj
 }
 
 SQLiteStatement::~SQLiteStatement() {
-    if(this->statement != nullptr) {
-        sqlite3_finalize(this->statement);
-        this->statement = nullptr;
-    }
+    this->closeCursor();
 }
 
 bool SQLiteStatement::execute() {
@@ -184,4 +181,15 @@ int SQLiteStatement::columnCount() {
         this->columns = sqlite3_column_count(this->statement);
     }
     return this->columns;
+}
+
+void SQLiteStatement::closeCursor() {
+    if(this->statement != nullptr) {
+        sqlite3_finalize(this->statement);
+        this->statement = nullptr;
+    }
+}
+
+std::string SQLiteStatement::debugDumpParams() {
+    return this->sql;
 }
