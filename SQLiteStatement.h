@@ -33,7 +33,7 @@ public:
     /**
      * Returns the number of columns in the result set
      */
-    void columnCount() override { }
+    int columnCount() override ;
     /**
      * Dump an SQL prepared command
      */
@@ -41,11 +41,11 @@ public:
     /**
      * Fetch the SQLSTATE associated with the last operation on the statement handle
      */
-    void errorCode() override { }
+    int errorCode() override ;
     /**
      * Fetch extended error information associated with the last operation on the statement handle
      */
-    void errorInfo() override { }
+    std::string errorInfo() override ;
     /**
      * Executes a prepared statement
      */
@@ -111,6 +111,11 @@ private:
     sqlite3 * connection = nullptr;
     sqlite3_stmt *statement = nullptr;
     std::string sql;
+
+    //INFORMATION
+    int columns = 0;
+    int status = -1;
+    std::string statusInfo;
 
     bool execute(std::string sql);
 

@@ -80,6 +80,7 @@ bool SQLiteStatement::execute(std::string sql) {
     if(this->statement != nullptr) {
         sqlite3_finalize(this->statement);
         this->statement = nullptr;
+        this->columns = 0;
     }
     int status = sqlite3_prepare_v2(this->connection, sql.c_str(), -1, &this->statement, nullptr);
     if (status != SQLITE_OK) {
@@ -98,9 +99,9 @@ Line SQLiteStatement::fetch() {
     if(this->statement == nullptr){
         throw SQLiteException("No Statement Executed!");
     }
-    int cols = sqlite3_column_count(this->statement);
-    int status = sqlite3_step(this->statement);
-    if (status == SQLITE_ROW) {
+    int cols = this->columnCount();
+    this->status = sqlite3_step(this->statement);
+    if (this->status == SQLITE_ROW) {
         vector<map<string, string>> values;
         Line line;
         for (int col = 0; col < cols; col++) {
@@ -122,7 +123,7 @@ Line SQLiteStatement::fetch() {
         }
         return line;
     } else {
-        switch (status) {
+        switch (this->status) {
             case SQLITE_DONE:
                 return {};
             case SQLITE_BUSY:
@@ -134,7 +135,11 @@ Line SQLiteStatement::fetch() {
             case SQLITE_CANTOPEN:
                 throw SQLiteException("SQLite Unable to open the database file");
             default:
-                throw SQLiteException("SQLite error num: " + std::to_string(status) + " message " + sqlite3_errmsg(this->connection));
+                throw SQLiteException(
+                        "SQLite error num: " +
+                        std::to_string(this->status) + " message " +
+                        this->errorInfo()
+                );
         }
     }
 }
@@ -161,4 +166,22 @@ vector<Line> SQLiteStatement::fetchAll() {
  */
 int SQLiteStatement::rowCount() {
     return sqlite3_changes(this->connection);
+}
+
+int SQLiteStatement::errorCode() {
+    return this->status;
+}
+
+std::string SQLiteStatement::errorInfo() {
+    if(this->statusInfo.empty()){
+        this->statusInfo = sqlite3_errmsg(this->connection);
+    }
+    return this->statusInfo;
+}
+
+int SQLiteStatement::columnCount() {
+    if(this->columns == 0){
+        this->columns = sqlite3_column_count(this->statement);
+    }
+    return this->columns;
 }
