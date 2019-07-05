@@ -23,7 +23,7 @@ bool SQLiteStatement::execute(const Param& params) {
     if(!this->bindValueByName.empty() || !this->bindValueByIndex.empty()){
         throw SQLiteException("Do not use execute bind and bindValue at the same time.");
     }
-    this->sql = params.bind(this->sql);
+    this->sql = params.bind(this->sql, this);
     this->execute(this->sql);
 }
 
