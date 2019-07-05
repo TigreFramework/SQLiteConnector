@@ -60,6 +60,9 @@ Line SQLiteStatement::fetch() {
         for (int col = 0; col < cols; col++) {
             std::string column_name = (char *) sqlite3_column_name(this->statement, col);
             int column_type = sqlite3_column_type(this->statement, col);
+            if(this->bindColumnByIndex.find(col) != this->bindColumnByIndex.end()) {
+                line[column_name] = this->bindColumnByIndex[col];
+            }
             switch (column_type) {
                 case SQLITE_INTEGER:
                     line[column_name] = sqlite3_column_int(this->statement, col);
@@ -160,4 +163,8 @@ void SQLiteStatement::bindValue(std::string name, Value value) {
 
 std::string SQLiteStatement::quote(const std::string &value) {
     return "'" + value + "'";
+}
+
+void SQLiteStatement::bindColumn(int index, Value value) {
+    this->bindColumnByIndex[index] = value;
 }

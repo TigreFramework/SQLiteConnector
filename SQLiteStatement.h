@@ -17,7 +17,7 @@ public:
     /**
      * Bind a column to a PHP variable
      */
-    void bindColumn() override { }
+    void bindColumn(int index, Value value) override ;
     /**
      * Binds a value to a parameter
      */
@@ -85,6 +85,7 @@ private:
     int status = -1;
     std::string statusInfo;
 
+    std::map<int, Value> bindColumnByIndex;
     std::map<int, Value> bindValueByIndex;
     std::map<std::string, Value> bindValueByName;
 
