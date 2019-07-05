@@ -119,7 +119,9 @@ void SQLiteDataObject::query() {}
 /**
  * Quotes a string for use in a query
  */
-void SQLiteDataObject::quote() {}
+std::string SQLiteDataObject::quote(const std::string &value) {
+    return "\"" + value + "\"";
+}
 
 /**
  * Rolls back a transaction

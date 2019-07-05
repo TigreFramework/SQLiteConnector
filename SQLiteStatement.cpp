@@ -155,3 +155,7 @@ void SQLiteStatement::bindValue(int index, Value value) {
 void SQLiteStatement::bindValue(std::string name, Value value) {
     this->bindValueByName[name] = value;
 }
+
+std::string SQLiteStatement::quote(const std::string &value) {
+    return "\"" + value + "\"";
+}
