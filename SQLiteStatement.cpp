@@ -13,64 +13,18 @@ SQLiteStatement::~SQLiteStatement() {
 }
 
 bool SQLiteStatement::execute() {
-    return this->execute(this->sql);
+    Param param;
+    param.set(this->bindValueByIndex);
+    param.set(this->bindValueByName);
+    return this->execute(param);
 }
 
-bool SQLiteStatement::execute(std::map<string, Value> params) {
-    std::string prepared_sql;
-
-    if(params.empty()) {
-        prepared_sql = this->sql.c_str();
-    } else {
-        Tigre::String sql = this->sql;
-        for(const auto & param : params) {
-            const auto & p = param.second;
-            Tigre::String value;
-            if (p.isString()) {
-                value += std::string("\"");
-                value += p.getString();
-                value += std::string("\"");
-            } else if (p.isInteger()) {
-                value += std::to_string(p.getInteger());
-            } else if (p.isFloat()) {
-                value += std::to_string(p.getFloat());
-            } else if (p.isDouble()) {
-                value += std::to_string(p.getDouble());
-            }
-            sql.replace(param.first, value);
-        }
-        prepared_sql = sql.getValue();
+bool SQLiteStatement::execute(const Param& params) {
+    if(!this->bindValueByName.empty() || !this->bindValueByIndex.empty()){
+        throw SQLiteException("Do not use execute bind and bindValue at the same time.");
     }
-
-    return this->execute(prepared_sql);
-}
-
-bool SQLiteStatement::execute(std::vector<Value> params) {
-    std::string result;
-    int j = 0;
-    if(!params.empty()) {
-        for (char i : this->sql) {
-            if (i == '?' && j < params.size()) {
-                if (params[j].isString()) {
-                    result += std::string("\"");
-                    result += params[j].getString();
-                    result += std::string("\"");
-                } else if (params[j].isInteger()) {
-                    result += std::to_string(params[j].getInteger());
-                } else if (params[j].isFloat()) {
-                    result += std::to_string(params[j].getFloat());
-                } else if (params[j].isDouble()) {
-                    result += std::to_string(params[j].getDouble());
-                }
-                j++;
-            } else {
-                result += std::string(1, i);
-            }
-        }
-    } else {
-        result = this->sql;
-    }
-    return this->execute(result);
+    this->sql = params.bind(this->sql);
+    this->execute(this->sql);
 }
 
 bool SQLiteStatement::execute(std::string sql) {
@@ -192,4 +146,12 @@ void SQLiteStatement::closeCursor() {
 
 std::string SQLiteStatement::debugDumpParams() {
     return this->sql;
+}
+
+void SQLiteStatement::bindValue(int index, Value value) {
+    this->bindValueByIndex[index] = value;
+}
+
+void SQLiteStatement::bindValue(std::string name, Value value) {
+    this->bindValueByName[name] = value;
 }

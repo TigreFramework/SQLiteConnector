@@ -25,7 +25,8 @@ public:
     /**
      * Binds a value to a parameter
      */
-    void bindValue() override { }
+    void bindValue(int index, Value value) override ;
+    void bindValue(std::string name, Value value) override ;
     /**
      * Closes the cursor, enabling the statement to be executed again
      */
@@ -48,19 +49,14 @@ public:
     std::string errorInfo() override ;
     /**
      * Executes a prepared statement
-     */
-    /**
-     * Use named field
+     *
+     * Using named field or
+     * Using interrogation as marker
+     *
      * @param params
      * @return bool
      */
-    bool execute(std::map<string, Value> params) override ;
-    /**
-     * Use interrogation as marker
-     * @param params
-     * @return bool
-     */
-    bool execute(std::vector<Value> params)  override ;
+    bool execute(const Param& params)  override ;
     /**
      * No bind Used
      * @return bool
@@ -75,10 +71,6 @@ public:
      */
     vector<Line> fetchAll() override ;
     /**
-     * Returns metadata for a column in a result set
-     */
-    void getColumnMeta() override { }
-    /**
      * Returns the number of rows affected by the last SQL statement
      */
     int rowCount() override ;
@@ -92,6 +84,9 @@ private:
     int columns = 0;
     int status = -1;
     std::string statusInfo;
+
+    std::map<int, Value> bindValueByIndex;
+    std::map<std::string, Value> bindValueByName;
 
     bool execute(std::string sql);
 
