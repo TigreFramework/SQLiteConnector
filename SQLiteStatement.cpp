@@ -16,6 +16,8 @@ bool SQLiteStatement::execute() {
     Param param;
     param.set(this->bindValueByIndex);
     param.set(this->bindValueByName);
+    this->bindValueByIndex.clear();
+    this->bindValueByName.clear();
     return this->execute(param);
 }
 
