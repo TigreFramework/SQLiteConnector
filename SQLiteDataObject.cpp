@@ -42,12 +42,24 @@ SQLiteDataObject::~SQLiteDataObject() {
 /**
  * Inicia uma transação
  */
-void SQLiteDataObject::beginTransaction() {}
+void SQLiteDataObject::beginTransaction() {
+    auto status = sqlite3_exec(this->database, "BEGIN TRANSACTION;", nullptr, nullptr, nullptr);
+    if (status != SQLITE_OK) {
+        auto message = std::string("\"SQLiteDataObject::beginTransaction\" failed: ") + sqlite3_errmsg(this->database);
+        throw SQLiteException(message);
+    }
+}
 
 /**
  * Envia uma transação
  */
-void SQLiteDataObject::commit() {}
+void SQLiteDataObject::commit() {
+    auto status = sqlite3_exec(this->database, "COMMIT TRANSACTION;", nullptr, nullptr, nullptr);
+    if (status != SQLITE_OK) {
+        auto message = std::string("\"SQLiteDataObject::beginTransaction\" failed: ") + sqlite3_errmsg(this->database);
+        throw SQLiteException(message);
+    }
+}
 
 /**
  * Fetch the SQLSTATE associated with the last operation on the database handle
@@ -112,7 +124,13 @@ void SQLiteDataObject::quote() {}
 /**
  * Rolls back a transaction
  */
-void SQLiteDataObject::rollBack() {}
+void SQLiteDataObject::rollBack() {
+    auto status = sqlite3_exec(this->database, "ROLLBACK TRANSACTION;", nullptr, nullptr, nullptr);
+    if (status != SQLITE_OK) {
+        auto message = std::string("\"SQLiteDataObject::beginTransaction\" failed: ") + sqlite3_errmsg(this->database);
+        throw SQLiteException(message);
+    }
+}
 
 /**
  * Set an attribute
